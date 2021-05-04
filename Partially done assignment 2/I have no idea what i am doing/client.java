@@ -26,7 +26,7 @@ public class client {
                 sendMsg(s, "REDY\n");
                 //Obtains  job from the server
                 currentMsg = readMsg(s);
-                System.out.println("JOB: " + currentMsg);
+                //System.out.println("JOB: " + currentMsg);
                 //Checks to see if the received command is "NONE" or "QUIT" which
                 //ends the program
                 if(currentMsg.contains("NONE") || currentMsg.contains("QUIT")){
@@ -54,23 +54,32 @@ public class client {
                     
                     //See what servers are available
                     sendMsg(s, "GETS Capable " + JOBNSplit[4] + " " + JOBNSplit[5] + " " + JOBNSplit[6] + "\n");
-                    currentMsg = readMsg(s);
-                    System.out.println("Data: " + currentMsg);
-                    //Say OK to the server (ie: OK i got your msg)
+                    String capableServers = readMsg(s);
                     sendMsg(s, "OK\n");
-
                     //Read the available servers data
                     currentMsg = readMsg(s);
-                    //System.out.println("After Avail: " + currentMsg);
-
-                    
                     String[] AvailSplit = currentMsg.split("\n");
                     sendMsg(s, "OK\n");
                     if(AvailSplit.length <= 0){
                         break;
                     }
+                    sendMsg(s, "OK\n");
+                    //See what servers are available
+                    sendMsg(s, "GETS Avail " + JOBNSplit[4] + " " + JOBNSplit[5] + " " + JOBNSplit[6] + "\n");
+                    
+                    sendMsg(s, "OK\n");
+                    //Read the available servers data
+                    String availServers = readMsg(s);
+                    AvailSplit = currentMsg.split("\n");
+                    sendMsg(s, "OK\n");
+                    if(AvailSplit.length <= 0){
+                        break;
+                    }
 
-                    String[] biggestServer = findBiggestServer(currentMsg);
+
+
+                    String[] firstFitServer = findFirstFitServer(capableServers, availServers);
+                    System.out.println("Outside findFirstFitServer");
                     /*String[] chosenServer = currentMsg.split("\n");
                     for(int i = 0; i < chosenServer.length; i++){
                         System.out.println(i + " = " + chosenServer[i]);
@@ -82,9 +91,9 @@ public class client {
                             i = AvailSplit.length;
                         }
                     }
-                    */
-                    currentMsg = readMsg(s);
-                    System.out.println("After Avail: " + currentMsg);
+                    
+                   // currentMsg = readMsg(s);
+                   // System.out.println("After Avail: " + currentMsg);
 
 
 
@@ -119,14 +128,17 @@ public class client {
                     System.out.println("AvailSplit[9]: " + AvailSplit[9]);
                     System.out.println("AvailSplit[10]: " + AvailSplit[10]);
 */
-
+                    for(int i = 0; i < firstFitServer.length; i++){
+                        System.out.println("firstFitServer[" + i + "] = " + firstFitServer[i]);
+                    }
+                    System.out.println("End");
 
 
                     //SCHD JobNumber ServerName ServerNumber
 
-                    sendMsg(s, "SCHD " + JOBNSplit[2] + " " + biggestServer[0] + " " + biggestServer[1] + "\n");
+                    sendMsg(s, "SCHD " + JOBNSplit[2] + " " + firstFitServer[0] + " " + firstFitServer[1] + "\n");
                     currentMsg = readMsg(s);
-                    System.out.println("SCHD: " + currentMsg);
+                   // System.out.println("SCHD: " + currentMsg);
                 }
 
                 else if(currentMsg.contains("DATA")){
@@ -200,33 +212,96 @@ public class client {
         
         //Check for response from sever for "HELO"
         currentMsg = readMsg(s);
-        System.out.println("RCVD: " + currentMsg);
+        //System.out.println("RCVD: " + currentMsg);
 
         //Authenticate with a username (ubuntu)
         sendMsg(s, "AUTH " + System.getProperty("user.name") + "\n");
 
         //Check to see if sever has ok'd the client's AUTH
         currentMsg = readMsg(s);
-        System.out.println("RCVD: " + currentMsg);
+        //System.out.println("RCVD: " + currentMsg);
     }
 
     //Used to find the biggest server available to run the current job
-    public static String[] findBiggestServer(String currentMsg){
-        //What we will return as the biggest server to use
-        String[] biggestServer = {""};
-        //All the servers sent from the server being split into an array
-        String[] serversAndInfo = currentMsg.split("\n");
-        System.out.println(serversAndInfo[0]);
-
-        String fastestTurnAroundServer = "";
-
-        for(int i = 0; i < serversAndInfo.length; i++){
-            String[] currentServer = serversAndInfo[i].split(" ");
-            System.out.println(currentServer[1]);
-            //if ()
-
-
+    public static String[] findFirstFitServer(String capableServers, String availServers){
+        System.out.println("available set");
+        String[] available = availServers.split("\n");
+        String[] firstAvailable = {""};
+        System.out.println("availServers: " + availServers);
+        System.out.println("REEEEEEEEEEEEEEEE");
+        System.out.println("available length: " + available.length);
+        if(available.length >= 4){
+            firstAvailable = available[4].split(" ");
+            if(!available[4].contains(".")){
+                return firstAvailable;
+            }
         }
+
+
+        System.out.println("capable set");
+        String[] capable = capableServers.split("\n");
+        String[] firstCapable = {""};
+        for(int i = 0; i < capable.length; i++){
+            firstCapable = capable[i].split(" ");
+            if(firstCapable[2].contains("active")){
+                return firstCapable;
+            }
+        }
+        for(int i = 0; i < capable.length; i++){
+            firstCapable = capable[i].split(" ");
+            if(firstCapable[2].contains("inactive")){
+                return firstCapable;
+            }
+        }
+        for(int i = 0; i < capable.length; i++){
+            firstCapable = capable[i].split(" ");
+            if(firstCapable[2].contains("booting")){
+                return firstCapable;
+            }
+        }
+        System.out.println("FAIL");
+        return firstCapable;
+
+
+
+
+        /*
+        //All the servers sent from the server being split into an array
+        String[] capableServersAndInfo = capableServers.split("\n");
+        String[] availServersAndInfo = availServers.split("\n");
+
+        //System.out.println("serversAndInfo size: " + serversAndInfo.length);
+        
+        String currentServerString = "";
+        String[] currentServer = {""};
+        String[] bestFitServer = {""};
+        String[] backupServer = {""};
+        String[] secondBackupServer = {""};
+
+        
+        for(int i = 0; i < capableServersAndInfo.length; i++){
+            currentServerString = capableServersAndInfo[i];
+            if(availServers.contains(currentServerString)){
+                bestFitServer = currentServerString.split(" ");
+                return bestFitServer;
+            }
+        }
+
+        for(int i = 0; i < capableServersAndInfo.length; i++){
+            currentServer = capableServersAndInfo[i].split(" ");
+            if(currentServer[2].contains("booting")){
+                return currentServer;
+            }
+        }
+
+        for(int i = 0; i < capableServersAndInfo.length; i++){
+            currentServer = capableServersAndInfo[i].split(" ");
+            if(currentServer[2].contains("inactive")){
+                return currentServer;
+            }
+        }
+        currentServer = capableServersAndInfo[0].split(" ");
+        return currentServer;
 
 
 
@@ -249,8 +324,14 @@ public class client {
 
 
 
+        //System.out.println("fastestTurnAroundServer" + fastestTurnAroundServer);
+        if(backupServer.length < 2){
+            System.out.println("Small");
+            bestFitServer = serversAndInfo[0].split(" ");
+        }
+        return bestFitServer;*/
 
 
-        return biggestServer;
+
     }
 }
