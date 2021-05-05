@@ -1,0 +1,2 @@
+Stage 2:
+Cost: hourlyRate (Available servers - Use server that costs the least)
