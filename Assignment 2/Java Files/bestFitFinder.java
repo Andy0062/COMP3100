@@ -13,7 +13,7 @@ public class bestFitFinder {
         int coreScore = currentServerCores - Integer.parseInt(cores);
         int coreValue = coreScore;
         int jobCount = -1;
-
+        String[][] workingServers = {{""}};
        
 
         
@@ -25,12 +25,12 @@ public class bestFitFinder {
             if(!servers[i].contains(".")){
                 String[] currentServer = servers[i].split(" ");
                 if(currentServer.length > 2){
-
+                    System.out.println("here");
                     currentServerCores = Integer.parseInt(currentServer[4]);
                     coreScore = currentServerCores - Integer.parseInt(cores);
                     String msg = "CNTJ " + currentServer[0] + " " + currentServer[1] + " " + 2 + "\n";
                     msgWriter.sendMsg(s, msg);
-
+                    
                     String jobs = msgReader.readMsg(s);
                     msgWriter.sendMsg(s, "OK\n");
                     String[] jobStringCount = jobs.split("\n");
@@ -40,33 +40,68 @@ public class bestFitFinder {
                     else{
                         jobCount = Integer.parseInt(jobStringCount[0]);
                     }
+                    
                     if(jobCount > 0){
-                        if(coreScore == 0){
+                        /*
+                        //Make array of them
+                        //Choose one with lowest coreScore
+                        String[][] myArr = workingServers;
+                        workingServers = new String[myArr.length + 1][];
+                        for(int j = 0; j < myArr.length; j++){
+                            workingServers[j] = myArr[j];
+                        }
+                        workingServers[workingServers.length - 1] = currentServer;
+                        System.out.println("added to workingServers");*/
+
+                        //for(int j = 0; j < servers.length; j++){
+
+
+                            //if(coreScore == 0){
                             bestFitServer = currentServer;
                             coreValue = coreScore; 
                             i = servers.length;
-                        }
+                            System.out.println("Job Count: " + jobCount + " coreValue: " + coreValue);
+                            //}
+                       // }*/
                     }
+                    
                 }
             }
         }
+/*
+        
+        if(workingServers.length > 1){
+            coreValue = Integer.parseInt(workingServers[1][4]) - Integer.parseInt(cores);
 
+            for(int i = 1; i < workingServers.length; i++){
+                coreScore = Integer.parseInt(workingServers[i][4]) - Integer.parseInt(cores);
+                if(coreScore < coreValue){
+                    bestFitServer = workingServers[i];
+                    coreValue = coreScore;
+                }
+            }
+        }*/
 
         if(coreValue != 0){
             for(int i = 0; i < servers.length; i++){
                 if(!servers[i].contains(".")){
                     String[] currentServer = servers[i].split(" ");
-                    currentServerCores = Integer.parseInt(currentServer[4]);
-                    coreScore = currentServerCores - Integer.parseInt(cores);
-                    if(coreScore == 0){
-                        bestFitServer = currentServer;
-                        coreValue = coreScore; 
-                        i = servers.length;
-                    }
-                    else{
-                        if(coreScore < coreValue && coreScore > 0){
+                    if(currentServer.length > 2){
+                        
+                        currentServerCores = Integer.parseInt(currentServer[4]);
+                        coreScore = currentServerCores - Integer.parseInt(cores);
+                        if(coreScore == 0){
                             bestFitServer = currentServer;
                             coreValue = coreScore; 
+                            i = servers.length;
+                            System.out.println("coreValueZero'd: " + coreValue);
+                        }
+                        else{
+                            if(coreScore < coreValue){
+                                bestFitServer = currentServer;
+                                coreValue = coreScore;
+                                System.out.println("coreValueUpdated: " + coreValue);
+                            }
                         }
                     }
                 }
