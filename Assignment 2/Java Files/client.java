@@ -16,12 +16,15 @@ public class client {
                 currentMsg = msgReader.readMsg(s);
                 
                 // Checks to see if the received command is a new job
-                if (currentMsg.contains("JOBN")) {
+                if (currentMsg.contains("JOBN") || currentMsg.contains("JOBP")) {
 
 
                     String[] JOBNSplit = currentMsg.split(" ");
+                    
                     //Ask what servers are available to run a job with the given data
                     msgWriter.sendMsg(s, "GETS Avail " + JOBNSplit[4] + " " + JOBNSplit[5] + " " + JOBNSplit[6] + "\n");
+
+
                     //Reads the msg saying what data is about to be sent and responds with "OK"
                     currentMsg = msgReader.readMsg(s);
                     msgWriter.sendMsg(s, "OK\n");
@@ -29,30 +32,44 @@ public class client {
                     // Reads the available servers data and responds with "OK"
                     currentMsg = msgReader.readMsg(s);
                     msgWriter.sendMsg(s, "OK\n");
-                    //System.out.println(currentMsg);
+
                     bestServer = bestFitFinder.bestFit(currentMsg, JOBNSplit[4], s);
-                   // System.out.println("Outside bestServer");
-                    /*if(bestServer.length < 2){
-                        currentMsg = msgReader.readMsg(s);
-                        msgWriter.sendMsg(s, "GETS Capable " + JOBNSplit[4] + " " + JOBNSplit[5] + " " + JOBNSplit[6] + "\n");
-                        currentMsg = msgReader.readMsg(s);
-                        msgWriter.sendMsg(s, "OK\n");
-                        currentMsg = msgReader.readMsg(s);
-                        msgWriter.sendMsg(s, "OK\n");
-
-                        bestServer = bestFitFinder.closestFit(currentMsg, JOBNSplit[4]);
-                    }*/
 
 
+                   
                     //Reads "." from the server
                     currentMsg = msgReader.readMsg(s);
+                    if(bestServer.length > 1){
+                        //Schedule the current job to the biggest server (SCHD JobNumber ServerName ServerNumber)
+                        msgWriter.sendMsg(s, "SCHD " + JOBNSplit[2] + " " + bestServer[0] + " " + bestServer[1] + "\n");
+                    
 
-                    //Schedule the current job to the biggest server (SCHD JobNumber ServerName ServerNumber)
-                    msgWriter.sendMsg(s, "SCHD " + JOBNSplit[2] + " " + bestServer[0] + " " + bestServer[1] + "\n");
-                  //  System.out.println("SCHD " + JOBNSplit[2] + " " + bestServer[0] + " " + bestServer[1]);
-                    //Read the next JOB
-                    currentMsg = msgReader.readMsg(s);
-                    //System.out.println("SCHD: " + currentMsg);
+
+                        //Read the next JOB
+                        currentMsg = msgReader.readMsg(s);
+                    }
+                    else{
+                        //Ask what servers are available to run a job with the given data
+                        msgWriter.sendMsg(s, "GETS Capable " + JOBNSplit[4] + " " + JOBNSplit[5] + " " + JOBNSplit[6] + "\n");
+
+                        //Reads the msg saying what data is about to be sent and responds with "OK"
+                        currentMsg = msgReader.readMsg(s);
+                        msgWriter.sendMsg(s, "OK\n");
+
+                        // Reads the available servers data and responds with "OK"
+                        currentMsg = msgReader.readMsg(s);
+                        msgWriter.sendMsg(s, "OK\n");
+
+                        bestServer = bestFitFinder.bestFit(currentMsg, JOBNSplit[4], s);
+
+                        //Schedule the current job to the biggest server (SCHD JobNumber ServerName ServerNumber)
+                        msgWriter.sendMsg(s, "SCHD " + JOBNSplit[2] + " " + bestServer[0] + " " + bestServer[1] + "\n");
+                    
+                        //Read the next JOB
+                        currentMsg = msgReader.readMsg(s);
+                    }
+                    
+
                 }
                 else if (currentMsg.contains("DATA")) {
                     msgWriter.sendMsg(s, "OK\n");
