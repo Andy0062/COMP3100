@@ -10,6 +10,8 @@ public class bestFitFinder {
         String[] servers = currentMsg.split("\n");
         String[] bestFitServer = servers[0].split(" ");
         String[][] workingServers = {{""}};
+        String[] runningJobHighCoreServer = {""};
+        int runningJobHighCoreValue = -1;
         int[] workingServersJobCount = {0};
         if(bestFitServer.length == 1){
             return bestFitServer;
@@ -53,33 +55,49 @@ public class bestFitFinder {
                 }
             }
         }
+        if(bestFitServer.length > 1){
+            if(coreValue == 0){
+                return bestFitServer;
+            }
+            else{
+                runningJobHighCoreServer = bestFitServer;
+                runningJobHighCoreValue = coreValue;
+            }
+        }
 
 
-
-        if(coreValue != 0){
-            for(int i = 0; i < servers.length; i++){
-                if(!servers[i].contains(".")){
-                    String[] currentServer = servers[i].split(" ");
-                    if(currentServer.length > 2){
-                       
-                        currentServerCores = Integer.parseInt(currentServer[4]);
-                       
-                        coreScore = currentServerCores - Integer.parseInt(cores);
-                        if(coreScore == 0){
+        for(int i = 0; i < servers.length; i++){
+            if(!servers[i].contains(".")){
+                String[] currentServer = servers[i].split(" ");
+                if(currentServer.length > 2){
+                    
+                    currentServerCores = Integer.parseInt(currentServer[4]);
+                    
+                    coreScore = currentServerCores - Integer.parseInt(cores);
+                    if(coreScore == 0){
+                        bestFitServer = currentServer;
+                        coreValue = coreScore; 
+                        i = servers.length;
+                    }
+                    else{
+                        if(coreScore < coreValue){
                             bestFitServer = currentServer;
-                            coreValue = coreScore; 
-                            i = servers.length;
-                        }
-                        else{
-                            if(coreScore < coreValue){
-                                bestFitServer = currentServer;
-                                coreValue = coreScore;
-                            }
+                            coreValue = coreScore;
                         }
                     }
                 }
             }
         }
+
+        if(coreValue != 0){
+            if(coreValue < runningJobHighCoreValue){
+                return bestFitServer;
+            }
+            else{
+                return runningJobHighCoreServer;
+            }
+        }
+        
         return bestFitServer;
     }
 
