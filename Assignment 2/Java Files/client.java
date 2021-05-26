@@ -32,13 +32,14 @@ public class client {
                     // Reads the available servers data and responds with "OK"
                     currentMsg = msgReader.readMsg(s);
                     msgWriter.sendMsg(s, "OK\n");
-
+                    
+                    //Requests for the best server to be found (using the bestFitFinder class)
                     bestServer = bestFitFinder.bestFit(currentMsg, JOBNSplit[4], s);
 
-
-                   
                     //Reads "." from the server
                     currentMsg = msgReader.readMsg(s);
+
+                    //Checks to see if there is a valid server to be scheduled to
                     if(bestServer.length > 1){
                         //Schedule the current job to the biggest server (SCHD JobNumber ServerName ServerNumber)
                         msgWriter.sendMsg(s, "SCHD " + JOBNSplit[2] + " " + bestServer[0] + " " + bestServer[1] + "\n");
@@ -48,6 +49,7 @@ public class client {
                         //Read the next JOB
                         currentMsg = msgReader.readMsg(s);
                     }
+                    //If the best Server has not been found (there are no available servers)
                     else{
                         //Ask what servers are available to run a job with the given data
                         msgWriter.sendMsg(s, "GETS Capable " + JOBNSplit[4] + " " + JOBNSplit[5] + " " + JOBNSplit[6] + "\n");

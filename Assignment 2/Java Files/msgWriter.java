@@ -10,6 +10,7 @@ public class msgWriter {
             DataOutputStream dout = new DataOutputStream(s.getOutputStream());
             byte[] byteArray = currentMsg.getBytes();
             dout.write(byteArray);
+            //Empties the ouput stream so it is ready to send something else
             dout.flush();
         } catch (IOException e) {
             e.printStackTrace();
