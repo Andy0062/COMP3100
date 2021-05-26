@@ -1,0 +1,1 @@
+./test_results "java client" -o ru -n -c configs/
