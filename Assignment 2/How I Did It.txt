@@ -1,1 +1,0 @@
-Implemented Best Fit and got exact same results (GETS Avail - best fit algorithm - if none: GETS Capable - best fit algorithm)
